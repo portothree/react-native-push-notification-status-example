@@ -98,9 +98,24 @@ export default class App extends PureComponent<Props, State> {
       NotificationsAndroid.setRegistrationTokenUpdateListener(
         this.onPushRegistered,
       );
-      NotificationsAndroid.setNotificationOpenedListener(
-        this.onOpenedNotification,
+      NotificationsAndroid.setNotificationReceivedListener(notification => {
+        console.log(
+          'Notification received on device in background or quit mode',
+          notification.getData().title,
+        );
+      });
+      NotificationsAndroid.setNotificationReceivedInForegroundListener(
+        notification => {
+          console.log(
+            'Notification received on device in foreground',
+            notification.getData().title,
+          );
+        },
       );
+      NotificationsAndroid.setNotificationOpenedListener(notification => {
+        console.log('Notification clicked');
+        this.onOpenedNotification(notification);
+      });
     }
 
     this.state = {
@@ -208,20 +223,20 @@ export default class App extends PureComponent<Props, State> {
     this.initNotifications();
   };
 
-  onPushRegistrationFailed = error => this.setState({ tokenError: error });
+  onPushRegistrationFailed = (error) => this.setState({ tokenError: error });
 
   onNotificationReceivedForeground = (notification, completion) => {
     completion({ alert: true });
   };
 
-  onOpenedNotification = notification => {
+  onOpenedNotification = (notification) => {
     const data = notification.getData();
     if (data && data.notificationId) {
       this.markNotificationRead({ id: data.notificationId });
     }
   };
 
-  onSignIn = userId => {
+  onSignIn = (userId) => {
     this.setState({ userId: userId.toLowerCase() });
   };
 
